@@ -5,7 +5,6 @@ defmodule Servy.Handler do
   def handle(request) do
     request
     |> parse()
-    |> rewrite_request()
     |> rewrite_path()
     |> log()
     |> route()
@@ -27,11 +26,9 @@ defmodule Servy.Handler do
 
   def emojify(conv), do: conv
 
-  def rewrite_request(%{path: "/bears?id=" <> id} = conv) do
+  def rewrite_path(%{path: "/bears?id=" <> id} = conv) do
     %{conv | path: "/bears/#{id}"}
   end
-
-  def rewrite_request(conv), do: conv
 
   def rewrite_path(%{path: "/wildlife"} = conv) do
     %{conv | path: "/wildthings"}

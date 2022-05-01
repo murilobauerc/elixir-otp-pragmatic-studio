@@ -6,6 +6,8 @@ defmodule Servy.Handler do
 
   require Logger
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1, emojify: 1]
+  import Servy.Parser, only: [parse: 1]
+  import Servy.FileHandler, only: [handle_file: 2]
 
   @doc """
     Transforms the request into a response.
@@ -19,16 +21,6 @@ defmodule Servy.Handler do
     |> emojify()
     |> track()
     |> format_response()
-  end
-
-  def parse(request) do
-    [method, path, _] =
-      request
-      |> String.split("\n")
-      |> List.first()
-      |> String.split(" ")
-
-    %{method: method, path: path, resp_body: "", status: nil}
   end
 
   def route(%{method: "GET", path: "/bears/new"} = conv) do
@@ -51,7 +43,7 @@ defmodule Servy.Handler do
     %{conv | status: 403, resp_body: "Bears with #{id} must be never deleted!"}
   end
 
-  @pages_path Path.expand("../../pages", __DIR__)
+  @pages_path Path.expand("pages", File.cwd!)
 
   def route(%{method: "GET", path: "/about"} = conv) do
     serves_html_page(conv, "/about.html")
@@ -73,18 +65,6 @@ defmodule Servy.Handler do
     |> Path.join(page)
     |> File.read()
     |> handle_file(conv)
-  end
-
-  def handle_file({:ok, content}, conv) do
-    %{conv | status: 200, resp_body: content}
-  end
-
-  def handle_file({:error, :enoent}, conv) do
-    %{conv | status: 404, resp_body: "File not found!"}
-  end
-
-  def handle_file({:error, reason}, conv) do
-    %{conv | status: 500, resp_body: "File error: #{reason}"}
   end
 
   def format_response(%{method: _, path: _, resp_body: resp_body, status: status} = _conv) do

@@ -19,6 +19,26 @@ Accept: */*
 """
   end
 
+  def create_new_bears_request() do
+"""
+GET /bears/new HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+  end
+
+  def get_about_request() do
+"""
+GET /about HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+  end
+
   def get_bears_param_request() do
 """
 GET /bears?id=1 HTTP/1.1
@@ -54,16 +74,6 @@ GET /bears HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
-"""
-  end
-
-  def get_bigfoot_request() do
-"""
-GET /bigfoot HTTP/1.1
-Host: example.com
-User-Agent: ExampleBrowser/1.0
-Accept: */*
-
 """
   end
 end

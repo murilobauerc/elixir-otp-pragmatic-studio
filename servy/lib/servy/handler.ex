@@ -1,9 +1,16 @@
 defmodule Servy.Handler do
 
+  @moduledoc """
+    Handles HTTP requests.
+  """
   alias Servy.Utils.RequestHandlerSamples.Sample
 
   require Logger
+  import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1, emojify: 1]
 
+  @doc """
+    Transforms the request into a response.
+  """
   def handle(request) do
     request
     |> parse()
@@ -14,31 +21,6 @@ defmodule Servy.Handler do
     |> track()
     |> format_response()
   end
-
-  def track(%{status: 404, path: path} = conv) do
-    Logger.warn("#{path} is on the loose!")
-    conv
-  end
-
-  def track(conv), do: conv
-
-  def emojify(%{status: 200, resp_body: resp_body} = conv) do
-    %{conv | resp_body: "🎉 " <> resp_body <> " 🎉"}
-  end
-
-  def emojify(conv), do: conv
-
-  def rewrite_path(%{path: "/bears?id=" <> id} = conv) do
-    %{conv | path: "/bears/#{id}"}
-  end
-
-  def rewrite_path(%{path: "/wildlife"} = conv) do
-    %{conv | path: "/wildthings"}
-  end
-
-  def rewrite_path(conv), do: conv
-
-  def log(conv), do: IO.inspect(conv)
 
   def parse(request) do
     [method, path, _] =
@@ -54,6 +36,10 @@ defmodule Servy.Handler do
       }
   end
 
+  def route(%{method: "GET", path: "/bears/new"} = conv) do
+    serves_html_page(conv, "/form.html")
+  end
+
   def route(%{method: "GET", path: "/wildthings"} = conv) do
     %{conv | status: 200, resp_body: "Bears, Lions, Tigers"}
   end
@@ -66,12 +52,44 @@ defmodule Servy.Handler do
     %{conv | status: 200, resp_body: "Teddy, Smokey, Paddington"}
   end
 
-  def route(%{method: "DELETE", path: "bears" <> id} = conv) do
-    %{conv | status: 403, resp_body: "Bears must be never deleted!"}
+  def route(%{method: "DELETE", path: "/bears" <> id} = conv) do
+    %{conv | status: 403, resp_body: "Bears with #{id} must be never deleted!"}
+  end
+
+  @pages_path Path.expand("../../pages", __DIR__)
+
+  def route(%{method: "GET", path: "/about"} = conv) do
+    serves_html_page(conv, "/about.html")
+  end
+
+  def route(%{method: "GET", path: "/pages/" <> file = conv}) do
+    @pages_path
+    |> Path.join(file <> ".html")
+    |> File.read()
+    |> handle_file(conv)
   end
 
   def route(%{path: path} = conv) do
     %{conv | status: 404, resp_body: "No #{path} here!"}
+  end
+
+  defp serves_html_page(conv, page) do
+    @pages_path
+    |> Path.join(page)
+    |> File.read()
+    |> handle_file(conv)
+  end
+
+  def handle_file({:ok, content}, conv) do
+    %{conv | status: 200, resp_body: content}
+  end
+
+  def handle_file({:error, :enoent}, conv) do
+    %{conv | status: 404, resp_body: "File not found!"}
+  end
+
+  def handle_file({:error, reason}, conv) do
+    %{conv | status: 500, resp_body: "File error: #{reason}"}
   end
 
   def format_response(%{method: _, path: _, resp_body: resp_body, status: status} = _conv) do
@@ -96,25 +114,32 @@ defmodule Servy.Handler do
   end
 
   def perform_sample_requests() do
-  Sample.get_bears_param_request()
+    Sample.create_new_bears_request()
     |> handle()
     |> IO.puts()
 
-  Sample.get_wildthings_request()
+    Sample.get_about_request()
     |> handle()
     |> IO.puts()
 
-  Sample.get_bears_request()
+    Sample.get_bears_param_request()
     |> handle()
     |> IO.puts()
 
-  Sample.get_bear_by_id_request()
-  |> handle()
-  |> IO.puts()
+    Sample.get_wildthings_request()
+    |> handle()
+    |> IO.puts()
 
-  Sample.delete_bear_by_id_request()
-  |> handle()
-  |> IO.puts()
+    Sample.get_bears_request()
+    |> handle()
+    |> IO.puts()
 
+    Sample.get_bear_by_id_request()
+    |> handle()
+    |> IO.puts()
+
+    Sample.delete_bear_by_id_request()
+    |> handle()
+    |> IO.puts()
   end
 end

@@ -3,6 +3,6 @@ defmodule ServyTest do
   doctest Servy
 
   test "greets the world" do
-      #ignore
+    # ignore
   end
 end

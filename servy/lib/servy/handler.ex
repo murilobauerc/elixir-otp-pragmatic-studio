@@ -1,5 +1,4 @@
 defmodule Servy.Handler do
-
   @moduledoc """
     Handles HTTP requests.
   """
@@ -29,11 +28,7 @@ defmodule Servy.Handler do
       |> List.first()
       |> String.split(" ")
 
-      %{ method: method,
-        path: path,
-        resp_body: "",
-        status: nil
-      }
+    %{method: method, path: path, resp_body: "", status: nil}
   end
 
   def route(%{method: "GET", path: "/bears/new"} = conv) do

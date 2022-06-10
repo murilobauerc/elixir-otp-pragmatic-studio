@@ -1,5 +1,5 @@
 defmodule Servy.Parser do
-  alias Servy.Conv, as: Conv
+  alias Servy.Conv
 
   def parse(request) do
     [top, params_string] = String.split(request, "\n\n")
@@ -9,8 +9,7 @@ defmodule Servy.Parser do
     [method, path, _] = String.split(request_line, " ")
 
     headers = parse_headers(header_lines, %{})
-    params = parse_params(headers["Content Type"], params_string)
-
+    params = parse_params(headers["Content-Type"], params_string)
     [method, path, _] =
       top
       |> String.split("\n")

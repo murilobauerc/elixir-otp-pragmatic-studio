@@ -45,6 +45,10 @@ defmodule Servy.Handler do
 
   @pages_path Path.expand("pages", File.cwd!())
 
+  def route(%Conv{method: "POST", path: "/bears"} = conv) do
+    %{conv | status: 201, resp_body: "Created a #{conv.params["type"]} bear named #{conv.params["name"]}!"}
+  end
+
   def route(%Conv{method: "GET", path: "/about"} = conv) do
     serves_html_page(conv, "/about.html")
   end
@@ -78,6 +82,10 @@ defmodule Servy.Handler do
   end
 
   def perform_sample_requests() do
+    Sample.post_bears_request()
+    |> handle()
+    |> IO.puts()
+
     Sample.create_new_bears_request()
     |> handle()
     |> IO.puts()

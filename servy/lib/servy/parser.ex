@@ -10,6 +10,7 @@ defmodule Servy.Parser do
 
     headers = parse_headers(header_lines, %{})
     params = parse_params(headers["Content-Type"], params_string)
+
     [method, path, _] =
       top
       |> String.split("\n")
@@ -41,5 +42,5 @@ defmodule Servy.Parser do
     |> URI.decode_query()
   end
 
-  def parse_params(_,_), do: %{}
+  def parse_params(_, _), do: %{}
 end

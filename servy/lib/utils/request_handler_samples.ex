@@ -12,6 +12,16 @@ defmodule Servy.Utils.RequestHandlerSamples.Sample do
     """
   end
 
+  def delete_bear_request() do
+    """
+    DELETE /bears?id=1 HTTP/1.1
+    Host: example.com
+    User-Agent: ExampleBrowser/1.0
+    Accept: */*
+
+    """
+  end
+
   def get_wildthings_request() do
     """
     GET /wildthings HTTP/1.1

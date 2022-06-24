@@ -42,7 +42,8 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{method: "DELETE", path: "/bears" <> id} = conv) do
-    %{conv | status: 403, resp_body: "Bears with #{id} must be never deleted!"}
+    id = Map.put(conv.params, "id", id)
+    BearController.delete(conv, id)
   end
 
   @pages_path Path.expand("pages", File.cwd!())
@@ -88,32 +89,36 @@ defmodule Servy.Handler do
     |> handle()
     |> IO.puts()
 
-    Sample.create_new_bears_request()
+    Sample.delete_bear_request()
     |> handle()
     |> IO.puts()
 
-    Sample.get_about_request()
-    |> handle()
-    |> IO.puts()
+    # Sample.create_new_bears_request()
+    # |> handle()
+    # |> IO.puts()
 
-    Sample.get_bears_param_request()
-    |> handle()
-    |> IO.puts()
+    # Sample.get_about_request()
+    # |> handle()
+    # |> IO.puts()
 
-    Sample.get_wildthings_request()
-    |> handle()
-    |> IO.puts()
+    # Sample.get_bears_param_request()
+    # |> handle()
+    # |> IO.puts()
 
-    Sample.get_bears_request()
-    |> handle()
-    |> IO.puts()
+    # Sample.get_wildthings_request()
+    # |> handle()
+    # |> IO.puts()
 
-    Sample.get_bear_by_id_request()
-    |> handle()
-    |> IO.puts()
+    # Sample.get_bears_request()
+    # |> handle()
+    # |> IO.puts()
 
-    Sample.delete_bear_by_id_request()
-    |> handle()
-    |> IO.puts()
+    # Sample.get_bear_by_id_request()
+    # |> handle()
+    # |> IO.puts()
+
+    # Sample.delete_bear_by_id_request()
+    # |> handle()
+    # |> IO.puts()
   end
 end

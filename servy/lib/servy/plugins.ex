@@ -25,5 +25,7 @@ defmodule Servy.Plugins do
 
   def rewrite_path(%Conv{} = conv), do: conv
 
-  def log(conv), do: IO.inspect(conv)
+  def log(conv) do
+    IO.inspect(conv, label: "--------------------------------\n#{inspect(conv.method)} REALIZADO\n")
+  end
 end

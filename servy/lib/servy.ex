@@ -5,7 +5,7 @@ defmodule Servy do
 
   def triple(list) do
     list
-    |> Enum.map(& &1 * 3)
+    |> Enum.map(&(&1 * 3))
     |> IO.inspect(label: "All numbers tripled")
   end
 
@@ -14,5 +14,4 @@ defmodule Servy do
   end
 
   def recursive_triple([]), do: []
-
 end

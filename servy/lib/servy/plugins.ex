@@ -3,7 +3,9 @@ defmodule Servy.Plugins do
 
   @doc "Logs 404 errors."
   def track(%Conv{status: 404, path: path} = conv) do
-    Logger.warn("#{path} is on the loose!")
+    if Mix.env != :test do
+      Logger.warn("#{path} is on the loose!")
+    end
     conv
   end
 
@@ -26,6 +28,9 @@ defmodule Servy.Plugins do
   def rewrite_path(%Conv{} = conv), do: conv
 
   def log(conv) do
-    IO.inspect(conv, label: "--------------------------------\n#{inspect(conv.method)} REALIZADO\n")
+    if Mix.env == :dev do
+      IO.inspect(conv, label: "--------------------------------\n#{inspect(conv.method)} REALIZADO\n")
+    end
+    conv
   end
 end

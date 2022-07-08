@@ -1,0 +1,8 @@
+<%# EEX = embedded elixir %>
+<h1>All the bears!</h1>
+
+<ul>
+    <%= for bear <- bears do %>
+        <li><%= bear.name %> - <%= bear.type %></li>
+    <% end %>
+</ul>

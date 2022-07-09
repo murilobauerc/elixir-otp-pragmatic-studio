@@ -24,6 +24,14 @@ defmodule Servy.Handler do
     |> format_response()
   end
 
+  def route(%Conv{method: "GET", path: "/kaboom"} = _conv) do
+    raise "Kaboom!"
+  end
+
+  def route(%Conv{method: "GET", path: "/hibernate/" <> time} = _conv) do
+    time |> String.to_integer |> :timer.sleep
+  end
+
   def route(%Conv{method: "GET", path: "/bears/new"} = conv) do
     serves_html_page(conv, "/form.html")
   end
@@ -78,13 +86,13 @@ defmodule Servy.Handler do
     |> handle_file(conv)
   end
 
-  def format_response(%Conv{method: _, path: _, resp_body: resp_body, status: _} = conv) do
+  def format_response(%Conv{} = conv) do
     """
     HTTP/1.1 #{Conv.full_status(conv)}\r
-    Content-Type: #{Conv.resp_content_type}\r
-    Content-Length: #{String.length(resp_body)}\r
+    Content-Type: #{conv.resp_content_type}\r
+    Content-Length: #{String.length(conv.resp_body)}\r
     \r
-    #{resp_body}
+    #{conv.resp_body}
     """
   end
 

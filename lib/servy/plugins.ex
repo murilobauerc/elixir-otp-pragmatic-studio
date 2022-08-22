@@ -1,12 +1,15 @@
 defmodule Servy.Plugins do
   alias Servy.Conv
+  alias Servy.FourOhFourCounter
   require Logger
 
   @doc "Logs 404 errors."
   def track(%Conv{status: 404, path: path} = conv) do
-    if Mix.env != :test do
+    if Mix.env() != :test do
       Logger.warn("#{path} is on the loose!")
+      FourOhFourCounter.bump_count(path)
     end
+
     conv
   end
 
@@ -28,10 +31,10 @@ defmodule Servy.Plugins do
 
   def rewrite_path(%Conv{} = conv), do: conv
 
-  def log(conv) do
-    if Mix.env == :dev do
-      IO.inspect(conv, label: "--------------------------------\n#{inspect(conv.method)} REALIZADO\n")
-    end
-    conv
-  end
+  # def log(conv) do
+  #   if Mix.env == :dev do
+  #     IO.inspect(conv, label: "--------------------------------\n#{inspect(conv.method)} REALIZADO\n")
+  #   end
+  #   conv
+  # end
 end

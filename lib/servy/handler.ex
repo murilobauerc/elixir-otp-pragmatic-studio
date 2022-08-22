@@ -3,13 +3,12 @@ defmodule Servy.Handler do
     Handles HTTP requests.
   """
   alias Servy.Utils.RequestHandlerSamples.Sample
-  alias Servy.Conv
-  alias Servy.BearController
-  alias Servy.VideoCam
+
+  alias Servy.{Conv, BearController, PledgeController, VideoCam, FourOhFourCounter, Tracker}
 
   require Logger
 
-  import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1, emojify: 1]
+  import Servy.Plugins, only: [rewrite_path: 1, track: 1, emojify: 1]
   import Servy.Parser, only: [parse: 1]
   import Servy.FileHandler, only: [handle_file: 2]
 
@@ -20,27 +19,39 @@ defmodule Servy.Handler do
     request
     |> parse()
     |> rewrite_path()
-    |> log()
+    # |> log()
     |> route()
     |> emojify()
     |> track()
     |> format_response()
   end
 
-  def route(%Conv{method: "GET", path: "/snapshots"} = conv) do
-    parent = self() # the request-handling process
+  def route(%Conv{method: "POST", path: "/pledges"} = conv) do
+    PledgeController.create(conv, conv.params)
+  end
 
-    for cam_number <- 1..3 do
-      spawn(fn -> send(parent, {:result, VideoCam.get_snapshot("cam-#{cam_number}")}) end)
-    end
+  def route(%Conv{method: "GET", path: "/404s"} = conv) do
+    counts = FourOhFourCounter.get_counts()
 
-    snapshot1 = receive do {:result, filename} -> filename end
-    snapshot2 = receive do {:result, filename} -> filename end
-    snapshot3 = receive do {:result, filename} -> filename end
+    %{conv | status: 200, resp_body: inspect(counts)}
+  end
 
-    snapshots = [snapshot1, snapshot2, snapshot3]
+  def route(%Conv{method: "GET", path: "/pledges"} = conv) do
+    PledgeController.index(conv)
+  end
 
-    %{conv | status: 200, resp_body: inspect(snapshots)}
+  def route(%Conv{method: "GET", path: "/sensors"} = conv) do
+    # pid4 = Task.async(fn -> Tracker.get_location("bigfoot") end)
+
+    snapshots =
+      ["cam-1", "cam-2", "cam-3"]
+      |> Enum.map(&Task.async(fn -> VideoCam.get_snapshot(&1) end))
+      |> Enum.map(&Task.await/1)
+
+    # where_is_bigfoot = Task.await(pid4)
+    where_is_bigfoot = Tracker.get_location("bigfoot")
+
+    %{conv | status: 200, resp_body: inspect({snapshots, where_is_bigfoot})}
   end
 
   def route(%Conv{method: "GET", path: "/kaboom"} = _conv) do
@@ -48,7 +59,7 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{method: "GET", path: "/hibernate/" <> time} = _conv) do
-    time |> String.to_integer |> :timer.sleep
+    time |> String.to_integer() |> :timer.sleep()
   end
 
   def route(%Conv{method: "GET", path: "/bears/new"} = conv) do
